@@ -35,7 +35,7 @@ app.get('/api/hello', (req, res) => {
 
 app.get('/api/customers', (req,res) => {
     connection.query(
-      "select * from customer", 
+      "select * from customer where isDeleted = 0", 
       (err, rows, fields) => {
         res.send(rows);
       }
@@ -48,7 +48,7 @@ app.post('/api/customers', upload.single('image'), (req,res) => {
 
   console.log("---------start-------------");
 
-  let sql = 'INSERT INTO CUSTOMER VALUE (null, ?, ?, ?, ?, ?)';
+  let sql = 'INSERT INTO CUSTOMER VALUE (null, ?, ?, ?, ?, ?, now(), 0)';
   let image = '/image/' + req.file.filename;
   let name = req.body.name;
   let birthday = req.body.birthday;
@@ -69,6 +69,15 @@ app.post('/api/customers', upload.single('image'), (req,res) => {
     }
   );
 
+});
+
+app.delete('/api/customers/:id', (req, res) => {
+  let sql = 'UPDATE CUSTOMER SET isDeleted = 1 where id=?';
+
+  let params = [req.params.id];
+  connection.query(sql, params, (err, rows, fields) =>{
+    res.send(rows);
+  });
 });
 
 app.listen(port, () => console.log(`Lisening on port ${port}`));
